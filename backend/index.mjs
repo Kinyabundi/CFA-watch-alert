@@ -106,7 +106,7 @@ app.post('/query-alerts', async (req, res) => {
     console.log(response.data);
 
     res.status(200).json({
-      data: response.data,
+      data: response,
       status: "ok",
       msg: "Alerts fetched successfully"
     });

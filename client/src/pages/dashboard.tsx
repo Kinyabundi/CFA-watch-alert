@@ -45,7 +45,7 @@ const dashboard = () => {
 
 
     const getAlerts = async () => {
-        const resp = await axios.get("http://localhost:5000/api/query-alerts");
+        const resp = await axios.get("http://localhost:5000/query-alerts");
         if (resp?.data?.status === "ok") {
             setAlert(resp.data.data)
         }

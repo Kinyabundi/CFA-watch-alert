@@ -84,7 +84,7 @@ const getAccessToken = async () => {
    
 // };
 
-app.post('/query-alerts', async (req, res) => {
+app.get('/query-alerts', async (req, res) => {
 
   let data = JSON.stringify({
     "geometry": {

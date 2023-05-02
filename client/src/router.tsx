@@ -9,7 +9,7 @@ const routes: RouteObject[] = [
         element: <Home />,
     },
     {
-        path: 'MainLayout',
+        path: '/',
         element: <MainLayout />,
         children: [
             {

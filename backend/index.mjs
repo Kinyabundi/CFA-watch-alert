@@ -128,10 +128,10 @@ app.get('/query-alerts', async (req, res) => {
 
   try{
     const response = await axios.post(url, data, config);
-    console.log(response.data);
+    console.log(response.data)
 
     res.status(200).json({
-      data: response,
+      alerts: response.data?.data,
       status: "ok",
       msg: "Alerts fetched successfully"
     });

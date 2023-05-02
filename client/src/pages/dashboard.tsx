@@ -11,6 +11,7 @@ import {
   Td,
   Text,
 } from "@chakra-ui/react";
+import MainLayout from "../layout/MainLayout";
 
 export default function Dashboard() {
   const [infoAlerts, setInfoAlerts] = useState<IInfoAlert[]>([]);
@@ -29,33 +30,35 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <TableContainer>
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th>Date</Th>
-            <Th>Time</Th>
-            <Th>Longitude</Th>
-            <Th>Latitude</Th>
-            <Th>Count</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {infoAlerts.length > 0 ? (
-            infoAlerts.map((item, i) => (
-              <Tr key={i}>
-                <Td>{item?.alert__date}</Td>
-                <Td>{item?.alert__time_utc}</Td>
-                <Td>{item?.longitude}</Td>
-                <Td>{item?.latitude}</Td>
-                <Td>{item?.alert__count}</Td>
-              </Tr>
-            ))
-          ) : (
-            <Text>No Data Yet</Text>
-          )}
-        </Tbody>
-      </Table>
-    </TableContainer>
+    <MainLayout>
+      <TableContainer>
+        <Table variant="simple">
+          <Thead>
+            <Tr>
+              <Th>Date</Th>
+              <Th>Time</Th>
+              <Th>Longitude</Th>
+              <Th>Latitude</Th>
+              <Th>Count</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {infoAlerts.length > 0 ? (
+              infoAlerts.map((item, i) => (
+                <Tr key={i}>
+                  <Td>{item?.alert__date}</Td>
+                  <Td>{item?.alert__time_utc}</Td>
+                  <Td>{item?.longitude}</Td>
+                  <Td>{item?.latitude}</Td>
+                  <Td>{item?.alert__count}</Td>
+                </Tr>
+              ))
+            ) : (
+              <Text>No Data Yet</Text>
+            )}
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </MainLayout>
   );
 }

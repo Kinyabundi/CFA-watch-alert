@@ -1,10 +1,13 @@
 import axios from 'axios';
-import qs from 'qs';
 import express from 'express';
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import connectDB from "./connectdb.mjs";
+import mongoose from "mongoose";
+import CFA from "./models/cfa_member.mjs";
+import Alerts from "./models/alertsInfo.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +15,10 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const app = express();
+
+connectDB();
+
+mongoose.set("strictQuery", false);
 
 app.use(express.json());
 app.use(cors());
@@ -33,56 +40,28 @@ app.get('/', (req, res) => {
 
 const ApiKey = process.env.API_KEY;
 
-let data = qs.stringify({
-  'username': process.env.GFW_USERNAME,
-  'password': process.env.GFW_PASSWORD,
+app.post('/add-cfaMember', async (req, res) => {
+  const cfaInfo = req.body;
+
+  try {
+    const CFAMember = CFA.create(cfaInfo);
+    const result = await (await CFAMember).save();
+    console.log(result);
+    res.status(201).json({
+      status: "ok",
+      data: result,
+      msg: "CFA member added successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "error",
+      msg: "Error adding CFA member"
+    });
+  }
 });
 
-//get access token
-const getAccessToken = async () => {
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: 'https://data-api.globalforestwatch.org/auth/token',
-    headers: { 
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    data : data
-  };
-  
-  const response = await axios(config)
- return response.data.data.access_token;
-}
 
-//create api
-// const createAPI = async () => {
-
-//   let credentials = JSON.stringify({
-//     "alias": "gfw",
-//     "organization": "Vibranium",
-//     "email": "bundi.christine22@gmail.com",
-//     "domains": [],
-//     "never_expires": false
-//   });
-
-//   let Authorization = await getAccessToken();
-//   console.log(Authorization);
-
-//   let config = {
-//     method: 'post',
-//     url: 'https://data-api.globalforestwatch.org/auth/api-key',
-//     headers: { 
-//       'Content-Type': 'application/json', 
-//       'Authorization': `Bearer ${Authorization}`
-//     },
-//   };
-
-//     const response = await axios(config, credentials);
-//     // return response.data;
-//     console.log(response.data);
-
-   
-// };
 
 app.get('/query-alerts', async (req, res) => {
 
@@ -126,12 +105,35 @@ app.get('/query-alerts', async (req, res) => {
     },
   };
 
+  let date = null;
+  let Time = null;
+  let Count = null;
+  let Longitude = null;
+  let Latitude = null;
+
   try{
     const response = await axios.post(url, data, config);
-    console.log(response.data)
+    //console.log(response);
+    date = response.data?.data[0].alert__date;
+    Time = response.data?.data[0].alert__time_utc;
+    Count = response.data?.data[0].alert__count;
+    Longitude = response.data?.data[0].longitude;
+    Latitude = response.data?.data[0].latitude;
+
+    const alertInfo = {
+      date,
+      Time,
+      Count,
+      Longitude,
+      Latitude
+    }
+    const alert = Alerts.create(alertInfo);
+
+    const result = await (await alert).save();
+
 
     res.status(200).json({
-      alerts: response.data?.data,
+      alerts: response.data,
       status: "ok",
       msg: "Alerts fetched successfully"
     });
@@ -140,6 +142,53 @@ app.get('/query-alerts', async (req, res) => {
     res.status(400).json({
       status: "error",
       msg: "Error fetching alerts"
+    });
+  }
+});
+
+// get all alerts
+app.get("/get-alerts", async (req, res) => {
+  try {
+    const alerts = await Alerts.find();
+    console.log(alerts);
+    res.status(200).json({
+      status: "ok",
+      data: alerts,
+      msg: "Alerts fetched successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "error",
+      msg: "Error fetching alerts",
+    });
+  }
+});
+
+
+
+
+
+
+
+  
+
+//send OTP
+app.post("/send-otp", async (req, res) => {
+  // console.log(`Received message: \n ${data}`);
+  // res.sendStatus(200);
+  try {
+    await sendOTP(req.body.msg, req.body.to);
+
+    res.status(200).json({
+      status: "ok",
+      msg: "OTP sent successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "error",
+      msg: "An error was encountered",
     });
   }
 });

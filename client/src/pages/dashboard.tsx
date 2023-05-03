@@ -2,18 +2,26 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { IInfoAlert } from "../types/Alerts";
 import { useModal } from "../hooks/useModal";
+import { BsPersonPlus } from "react-icons/bs";
 import {
   Text,
   Box,
   Flex,
   SimpleGrid,
   Button,
+  Icon,
 } from "@chakra-ui/react";
 import { Helmet } from "react-helmet";
+import Modal from "../components/modal";
 
 export default function Dashboard() {
   const [infoAlerts, setInfoAlerts] = useState<IInfoAlert[]>([]);
-  const setIsOpen = useModal((state) => state.setIsOpen);
+//   const setIsOpen = useModal((state) => state.setIsOpen);
+const [isOpen, setIsOpen] = useState<boolean>(false);
+const onClose = () => setIsOpen(false);
+
+
+
 
 
   const getData = async () => {
@@ -48,6 +56,7 @@ export default function Dashboard() {
                   bg: "gray.300",
                 }}
                 onClick={() => setIsOpen(true)}
+                leftIcon={<Icon as={BsPersonPlus} w={4} h={4} />}
                 transition={
                   "background-color 0.2s ease-in-out, color 0.2s ease-in-out"
                 }
@@ -80,14 +89,16 @@ export default function Dashboard() {
                     </Text>
 
                 </SimpleGrid>
+               
                 {infoAlerts.length > 0 ? (
                     infoAlerts.map((item, i) => (
-                        <AlertItem item={item} key={i} refresh={getData} />
+                      <AlertItem item={item} key={i} refresh={getData} />
                     ))
                 ) : (
                     <Text>No Alerts</Text>
                 )}
             </Box>
+            <Modal isOpen={isOpen} onClose={onClose} />
         </>
     );
 }
@@ -119,10 +130,10 @@ const AlertItem = ({
                 }
             >
                 <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-                {item?.alert__date}
+                {item?.date}
                 </Text>
                 <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-                {item?.alert__time_utc}
+                {item?.time}
                 </Text>
                 <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
                 {item?.longitude}
@@ -131,7 +142,7 @@ const AlertItem = ({
                 {item?.latitude}
                 </Text>
                 <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-                {item?.alert__count}
+                {item?.count}
                 </Text>
 
             </SimpleGrid>

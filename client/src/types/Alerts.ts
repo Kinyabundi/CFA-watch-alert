@@ -1,7 +1,7 @@
 export interface IInfoAlert {
-    longitude: number;
-    latitude: number;
+    Longitude: number;
+    Latitude: number;
     date: string;
-    time: string;
-    count: number;
+    Time: string;
+    Count: number;
 }

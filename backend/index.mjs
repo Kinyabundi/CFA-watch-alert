@@ -150,7 +150,7 @@ app.get('/query-alerts', async (req, res) => {
 app.get("/get-alerts", async (req, res) => {
   try {
     const alerts = await Alerts.find();
-    console.log(alerts);
+    //console.log(alerts);
     res.status(200).json({
       status: "ok",
       data: alerts,

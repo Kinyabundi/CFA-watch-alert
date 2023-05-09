@@ -18,6 +18,9 @@ const AlertsSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        area: {
+            type: String,
+        },
         Count: {
             type: Number,
             required: true, 

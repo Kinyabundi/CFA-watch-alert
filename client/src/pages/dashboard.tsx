@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { IInfoAlert } from "../types/Alerts";
-import { useModal } from "../hooks/useModal";
 import { BsPersonPlus } from "react-icons/bs";
 import {
   Text,
@@ -13,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { Helmet } from "react-helmet";
 import Modal from "../components/modal";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const [infoAlerts, setInfoAlerts] = useState<IInfoAlert[]>([]);
@@ -34,7 +34,6 @@ export default function Dashboard() {
     getData();
   }, []);
 
-  //console.log(infoAlerts);
 
   return (
     <>
@@ -63,7 +62,7 @@ export default function Dashboard() {
           Add CFA Member
         </Button>
         <SimpleGrid
-          columns={[2, 3, 5, 5]}
+          columns={[2, 3, 4, 4]}
           spacing={4}
           mt={6}
           w={"full"}
@@ -78,10 +77,7 @@ export default function Dashboard() {
             Time
           </Text>
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
-            Longitude
-          </Text>
-          <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
-            Latitude
+            Location
           </Text>
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
             Count
@@ -112,7 +108,7 @@ const AlertItem = ({
   return (
     <>
       <SimpleGrid
-        columns={[2, 3, 5, 5]}
+        columns={[2, 3, 4, 4]}
         spacing={4}
         mt={6}
         w={"full"}
@@ -135,10 +131,7 @@ const AlertItem = ({
           {item?.Time}
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.Longitude}
-        </Text>
-        <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.Latitude}
+          {item?.area}
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
           {item?.Count}

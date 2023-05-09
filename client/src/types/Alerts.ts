@@ -4,4 +4,5 @@ export interface IInfoAlert {
     date: string;
     Time: string;
     Count: number;
+    area: string;
 }

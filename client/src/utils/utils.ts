@@ -1,4 +1,4 @@
-import objectCounties from "../data/counties.json";
+import objectCounties from "../data/location.json";
 export const counties = objectCounties.map((county) => county.name);
 
 // phone no format and convert to +254

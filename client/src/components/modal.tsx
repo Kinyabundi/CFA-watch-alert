@@ -16,7 +16,7 @@ import { nanoid } from "nanoid";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { formatKenyanPhoneNumber, locations } from "../utils/utils";
+import { formatKenyanPhoneNumber, counties } from "../utils/utils";
 
 interface AddCFAProps {
   isOpen: boolean;
@@ -121,7 +121,7 @@ const JoinModal = ({ isOpen, onClose }: AddCFAProps) => {
               placeholder="Choose ..."
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              options={locations}
+              options={counties}
               variant="select"
             />
         </ModalBody>

@@ -29,7 +29,7 @@ export default function Dashboard() {
       setInfoAlerts(data);
     }
   };
-
+ console.log(infoAlerts)
   useEffect(() => {
     getData();
   }, []);

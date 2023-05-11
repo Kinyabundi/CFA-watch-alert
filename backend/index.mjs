@@ -173,19 +173,21 @@ const query_Alerts = async () => {
 
   const returndata = response.data?.data;
   //console.log(response.data)
-  returndata.forEach(async (item) => {
-   // console.log(item)
-    let Lat = item.latitude
-    let Long = item.longitude
-   // console.log(Long)
-    const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
-    const locationData = await location.json();
-    // console.log(locationData.results[0].formatted);
-  })
+  // returndata.forEach(async (item) => {
+  //  // console.log(item)
+  //   let Lat = item.latitude
+  //   let Long = item.longitude
+  //  // console.log(Long)
+  //   const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
+  //   const locationData = await location.json();
+  //   // console.log(locationData.results[0].formatted);
+  // })
   let Lat = returndata[0].latitude
   let Long = returndata[0].longitude
-  const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
-  const locationData = await location.json();
+
+  const location = await axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`)
+  // const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
+  const locationData = await location.data;
 
  
   date = response.data?.data[0].alert__date;

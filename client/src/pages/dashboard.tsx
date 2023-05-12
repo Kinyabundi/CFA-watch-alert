@@ -22,14 +22,14 @@ export default function Dashboard() {
 
 
   const getData = async () => {
-    const resp = await axios.get("http://localhost:5000/get-alerts");
-    console.log(resp.data.data);
+    const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-alerts");
+   // console.log(resp?.data?.data);
     if (resp?.statusText === "OK") {
       const data = resp?.data?.data as IInfoAlert[];
       setInfoAlerts(data);
     }
   };
- console.log(infoAlerts)
+ // console.log(infoAlerts)
   useEffect(() => {
     getData();
   }, []);

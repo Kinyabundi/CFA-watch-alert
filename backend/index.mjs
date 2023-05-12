@@ -186,7 +186,7 @@ const query_Alerts = async () => {
   let Long = returndata[0].longitude
 
   const location = await axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`)
-  // const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
+   //const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
   const locationData = await location.data;
 
  
@@ -212,7 +212,7 @@ const query_Alerts = async () => {
 
   const result = await (await alert).save();
 
-  console.log(result)
+  // console.log(result)
 
 };
 cron.schedule("*/15 * * * * *", function () {
@@ -223,7 +223,7 @@ cron.schedule("*/15 * * * * *", function () {
 app.get("/get-alerts", async (req, res) => {
   try {
     const alerts = await Alerts.find();
-    //console.log(alerts);
+    console.log(alerts);
     res.status(200).json({
       status: "ok",
       data: alerts,
@@ -237,6 +237,7 @@ app.get("/get-alerts", async (req, res) => {
     });
   }
 });
+
 
 //send OTP
 app.post("/send-otp", async (req, res) => {

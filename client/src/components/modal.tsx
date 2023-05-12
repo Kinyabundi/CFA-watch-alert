@@ -62,7 +62,7 @@ const JoinModal = ({ isOpen, onClose }: AddCFAProps) => {
     setLoading(true);
     try {
       // send data to backend
-      const res = await axios.post("http://localhost:5000/add-cfaMember", {
+      const res = await axios.post("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/add-cfaMember", {
           nationalId,
           email,
           name,

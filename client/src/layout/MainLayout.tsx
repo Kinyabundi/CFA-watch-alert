@@ -110,14 +110,15 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text
-          fontSize="2xl"
+          fontSize="xl"
           fontFamily="monospace"
           fontWeight="bold"
           cursor={"pointer"}
+          mb={4}
           textTransform={"uppercase"}
           onClick={() => navigate("/")}
         >
-          Global Forest Watch
+          Forest Cover Reporting Tool
         </Text>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>

@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const [infoAlerts, setInfoAlerts] = useState<IInfoAlert[]>([]);
+  const [infoCFA, setInfoCFA] = useState<string>("");
   //   const setIsOpen = useModal((state) => state.setIsOpen);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const onClose = () => setIsOpen(false);
@@ -23,16 +24,29 @@ export default function Dashboard() {
 
   const getData = async () => {
     const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-alerts");
-   // console.log(resp?.data?.data);
-    if (resp?.statusText === "OK") {
+    //console.log(resp?.data?.data);
+    if (resp?.status === 200) {
       const data = resp?.data?.data as IInfoAlert[];
       setInfoAlerts(data);
     }
   };
- // console.log(infoAlerts)
   useEffect(() => {
     getData();
   }, []);
+  const getCFA = async () => {
+    const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-cfaMember");
+    console.log(resp?.data?.data);
+    if (resp?.status === 200) {
+      const CFAinfo = resp?.data?.data
+      console.log(CFAinfo)
+      setInfoCFA(CFAinfo);
+    }
+  }
+  useEffect(() => {
+    getCFA();
+  }, [])
+ 
+
 
 
   return (

@@ -63,6 +63,23 @@ app.post('/add-cfaMember', async (req, res) => {
     });
   }
 });
+app.get('/get-cfaMember', async (req,res) => {
+  try {
+    const cfa_member = await CFA.find();
+    console.log(cfa_member);
+    res.status(200).json({
+      status: "ok",
+      data: alerts,
+      msg: "CFA Info fetched successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "error",
+      msg: "Error fetching alerts",
+    });
+  }
+})
 
 
 const queryAlerts = async () => {
@@ -188,6 +205,7 @@ const query_Alerts = async () => {
   const location = await axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`)
    //const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
   const locationData = await location.data;
+  console.log(locationData)
 
  
   date = response.data?.data[0].alert__date;
@@ -195,7 +213,7 @@ const query_Alerts = async () => {
   Count = response.data?.data[0].alert__count;
   Longitude = response.data?.data[0].longitude;
   Latitude = response.data?.data[0].latitude;
-  area = locationData.results[0].formatted;
+  area = locationData.results[0].state;
 
   // console.log(area)
 

@@ -9,7 +9,9 @@ import mongoose from "mongoose";
 import CFA from "./models/cfa_member.mjs";
 import Alerts from "./models/alertsInfo.mjs";
 import cron from "node-cron";
+import fetch from 'node-fetch'; 
 import { url } from 'inspector';
+import { log } from 'console';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,11 +47,16 @@ const geocodeApi = process.env.GEOCODER_API_KEY
 
 app.post('/add-cfaMember', async (req, res) => {
   const cfaInfo = req.body;
-
+  const location = req.body.location;
+  console.log(location)
+  const response = await axios.get(`https://api.geoapify.com/v1/geocode/search?text=${location}%20county%2C%20Kenya&limit=1&format=json&apiKey=${geocodeApi}`);
+  const data = await response.data; 
+  const longitude = data.results[0].lon;
+  const latitude = data.results[0].lat;
   try {
-    const CFAMember = CFA.create(cfaInfo);
+    const CFAMember = CFA.create({...cfaInfo, longitude,latitude});
     const result = await (await CFAMember).save();
-    console.log(result);
+    //console.log(result);
     res.status(201).json({
       status: "ok",
       data: result,
@@ -66,10 +73,10 @@ app.post('/add-cfaMember', async (req, res) => {
 app.get('/get-cfaMember', async (req,res) => {
   try {
     const cfa_member = await CFA.find();
-    console.log(cfa_member);
+   // console.log(cfa_member);
     res.status(200).json({
       status: "ok",
-      data: alerts,
+      data: cfa_member,
       msg: "CFA Info fetched successfully",
     });
   } catch (err) {
@@ -82,56 +89,7 @@ app.get('/get-cfaMember', async (req,res) => {
 })
 
 
-const queryAlerts = async () => {
 
-  let data = JSON.stringify({
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            34.573606904790495,
-            4.270479062477051
-          ],
-          [
-            34.573606904790495,
-            4.230025232393615
-          ],
-          [
-            34.88042812147856,
-            4.230025232393615
-          ],
-          [
-            34.88042812147856,
-            4.270479062477051
-          ],
-          [
-            34.573606904790495,
-            4.270479062477051
-          ]
-        ]
-      ]
-    },
-    "sql": "SELECT longitude, latitude, alert__date, alert__time_utc, alert__count FROM results WHERE alert__date >= '2021-01-10' AND alert__date <= '2023-01-01' "
-  });
-
-  const url = 'https://data-api.globalforestwatch.org/dataset/nasa_viirs_fire_alerts/latest/query';
-
-  let config = {
-    headers: {
-      'x-api-key': ApiKey,
-      'Content-Type': 'application/json'
-    },
-  };
-  const response = await axios.post(url, data, config)
-  console.log(response.data);
-  //return response.data;
-};
-
-
-// cron.schedule("* */5 * * * *", function () {
-//  queryAlerts();
-// });
 
 const query_Alerts = async () => {
 
@@ -141,27 +99,27 @@ const query_Alerts = async () => {
       "coordinates": [
         [
           [
-            34.573606904790495,
-            4.270479062477051
+            36.45967072012695,
+            0.7796484821584784
           ],
           [
-            34.573606904790495,
-            4.230025232393615
+            36.45967072012695,
+            -1.8457405568735936
           ],
           [
-            34.88042812147856,
-            4.230025232393615
+            38.67890900137752,
+            -1.8457405568735936
           ],
           [
-            34.88042812147856,
-            4.270479062477051
+            38.67890900137752,
+            0.7796484821584784
           ],
           [
-            34.573606904790495,
-            4.270479062477051
+            36.45967072012695,
+            0.7796484821584784
           ]
         ]
-      ]
+      ],
     },
     "sql": "SELECT longitude, latitude, alert__date, alert__time_utc, alert__count FROM results WHERE alert__date >= '2021-01-10' AND alert__date <= '2023-01-01' "
   });
@@ -184,56 +142,54 @@ const query_Alerts = async () => {
 
 
   const response = await axios.post(url, data, config);
-  //console.log(response.data);
+   //console.log(response.data);
+
 
   const stateLocation = [];
-
-  const returndata = response.data?.data;
-  //console.log(response.data)
-  // returndata.forEach(async (item) => {
-  //  // console.log(item)
-  //   let Lat = item.latitude
-  //   let Long = item.longitude
-  //  // console.log(Long)
-  //   const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
-  //   const locationData = await location.json();
-  //   // console.log(locationData.results[0].formatted);
-  // })
-  let Lat = returndata[0].latitude
-  let Long = returndata[0].longitude
-
-  const location = await axios.get(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`)
-   //const location = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${Lat}&lon=${Long}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`);
-  const locationData = await location.data;
-  console.log(locationData)
-
  
-  date = response.data?.data[0].alert__date;
-  Time = response.data?.data[0].alert__time_utc;
-  Count = response.data?.data[0].alert__count;
-  Longitude = response.data?.data[0].longitude;
-  Latitude = response.data?.data[0].latitude;
-  area = locationData.results[0].state;
+   const returndata = response.data?.data;
+   const newData = returndata.slice(0,20)
+   console.log(newData)
+  //  for (let i = 0; i < newData.length; i++) {
+  //   let info = await axios.get(
+  //     `https://api.geoapify.com/v1/geocode/reverse?lat=${newData[i].latitude}&lon=${newData[i].longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
+  //   );
 
-  // console.log(area)
+  //   stateLocation.push(info.data.results[0].formatted);
 
+  //   //console.log(info.data.results[0].formatted);
+  // }
 
-  const alertInfo = {
-    date,
-    Time,
-    Count,
-    Longitude,
-    Latitude,
-    area
+   let alertsInfo = []
+  newData.forEach((item) => {
+  alertsInfo.push ({
+    date: item.alert__date,
+    time: item.alert__time_utc,
+    count: item.alert__count,
+    Longitude:item.longitude,
+    Latitude:item.latitude
+  })
+ })
+
+ console.log(alertsInfo)
+const bulk_ops = alertsInfo.map(doc => ({
+  updateOne:{
+    filter: {
+      date: doc.date,
+      Time: doc.time,
+      Count: doc.count,
+      Longitude:doc.Longitude,
+      Latitude: doc.Latitude
+    },
+    update: doc,
+    upsert: true,
   }
-  const alert = Alerts.create(alertInfo);
-
-  const result = await (await alert).save();
-
-  // console.log(result)
-
+}))
+ const alerts = await Alerts.bulkWrite(bulk_ops)
+ console.log(alerts)
+ 
 };
-cron.schedule("*/15 * * * * *", function () {
+cron.schedule("*/1* * * * *", function () {
   query_Alerts();
 });
 
@@ -241,7 +197,7 @@ cron.schedule("*/15 * * * * *", function () {
 app.get("/get-alerts", async (req, res) => {
   try {
     const alerts = await Alerts.find();
-    console.log(alerts);
+    //console.log(alerts);
     res.status(200).json({
       status: "ok",
       data: alerts,

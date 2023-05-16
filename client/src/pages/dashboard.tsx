@@ -13,10 +13,11 @@ import {
 import { Helmet } from "react-helmet";
 import Modal from "../components/modal";
 import toast from "react-hot-toast";
+import { IInfoCFA } from "../types/cfa";
 
 export default function Dashboard() {
   const [infoAlerts, setInfoAlerts] = useState<IInfoAlert[]>([]);
-  const [infoCFA, setInfoCFA] = useState<string>("");
+  const [infoCFA, setInfoCFA] = useState<IInfoCFA[]>([]);
   //   const setIsOpen = useModal((state) => state.setIsOpen);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const onClose = () => setIsOpen(false);
@@ -33,12 +34,13 @@ export default function Dashboard() {
   useEffect(() => {
     getData();
   }, []);
+
   const getCFA = async () => {
     const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-cfaMember");
-    console.log(resp?.data?.data);
+    console.log(resp.data);
     if (resp?.status === 200) {
-      const CFAinfo = resp?.data?.data
-      console.log(CFAinfo)
+      const CFAinfo = resp?.data
+      //console.log(CFAinfo)
       setInfoCFA(CFAinfo);
     }
   }
@@ -46,8 +48,6 @@ export default function Dashboard() {
     getCFA();
   }, [])
  
-
-
 
   return (
     <>

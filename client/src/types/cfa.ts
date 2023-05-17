@@ -5,4 +5,5 @@ export interface IInfoCFA {
     name:string;
     phoneNo:string;
     nationalId:string;
+
 }

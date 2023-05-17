@@ -1,7 +1,7 @@
 [{
 	"name": "Mombasa",
-	"code": 1,
-	"capital": "Mombasa City"
+	"code":1,
+	"capital":"Mombasa"
 }, {
 	"name": "Kwale",
 	"code": 2,
@@ -117,8 +117,8 @@
 	"capital": "Kapsabet"
 }, {
 	"name": "Baringo",
-	"code": 30,
-	"capital": "Kabarnet"
+	"code":30,
+	"capital": "Baringo"
 }, {
 	"name": "Laikipia",
 	"code": 31,

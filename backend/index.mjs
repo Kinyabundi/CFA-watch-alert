@@ -73,7 +73,7 @@ app.post('/add-cfaMember', async (req, res) => {
 app.get('/get-cfaMember', async (req,res) => {
   try {
     const cfa_member = await CFA.find();
-   // console.log(cfa_member);
+    //console.log(cfa_member);
     res.status(200).json({
       status: "ok",
       data: cfa_member,
@@ -89,10 +89,7 @@ app.get('/get-cfaMember', async (req,res) => {
 })
 
 
-
-
 const query_Alerts = async () => {
-
   let data = JSON.stringify({
     "geometry": {
       "type": "Polygon",
@@ -144,34 +141,51 @@ const query_Alerts = async () => {
   const response = await axios.post(url, data, config);
    //console.log(response.data);
 
-
-  const stateLocation = [];
- 
    const returndata = response.data?.data;
-   const newData = returndata.slice(0,20)
-   console.log(newData)
-  //  for (let i = 0; i < newData.length; i++) {
-  //   let info = await axios.get(
-  //     `https://api.geoapify.com/v1/geocode/reverse?lat=${newData[i].latitude}&lon=${newData[i].longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
-  //   );
+   const stateLocation = [];
+    const newData = returndata.slice(0,20)
+   //console.log(newData)
+//    for (let i = 0; i < newData.length; i++) {
+//     let info = await axios.get(
+//       `https://api.geoapify.com/v1/geocode/reverse?lat=${newData[i].latitude}&lon=${newData[i].longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
+//     );
+//     stateLocation.push( info.data.results[0].formatted);
 
-  //   stateLocation.push(info.data.results[0].formatted);
+//    // console.log(info.data.results[0].formatted);
+//   }
 
-  //   //console.log(info.data.results[0].formatted);
-  // }
+//    let alertsInfo = []
+//   newData.forEach(async(item) => {   
+//   alertsInfo.push ({
+//     date: item.alert__date,
+//     time: item.alert__time_utc,
+//     count: item.alert__count,
+//     Longitude:item.longitude,
+//     Latitude:item.latitude,
+//   })
+//  })
+let alertsInfo = [];
 
-   let alertsInfo = []
-  newData.forEach((item) => {
-  alertsInfo.push ({
+await Promise.all(newData.map(async (item) => {
+  let info = await axios.get(
+    `https://api.geoapify.com/v1/geocode/reverse?lat=${item.latitude}&lon=${item.longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
+  );
+ // console.log(info.data.results)
+  stateLocation.push(info.data.results[0].formatted);
+  
+  alertsInfo.push({
     date: item.alert__date,
     time: item.alert__time_utc,
     count: item.alert__count,
-    Longitude:item.longitude,
-    Latitude:item.latitude
-  })
- })
+    Longitude: item.longitude,
+    Latitude: item.latitude,
+    area: info.data.results[0].address_line1
+  });
+}));
 
- console.log(alertsInfo)
+// At this point, the alertsInfo array should contain the desired data
+console.log(alertsInfo);
+
 const bulk_ops = alertsInfo.map(doc => ({
   updateOne:{
     filter: {
@@ -179,17 +193,19 @@ const bulk_ops = alertsInfo.map(doc => ({
       Time: doc.time,
       Count: doc.count,
       Longitude:doc.Longitude,
-      Latitude: doc.Latitude
+      Latitude: doc.Latitude,
+      area: doc.area
     },
     update: doc,
     upsert: true,
   }
 }))
+
  const alerts = await Alerts.bulkWrite(bulk_ops)
- console.log(alerts)
+ //console.log(alerts)
  
 };
-cron.schedule("*/1* * * * *", function () {
+cron.schedule("*/15* * * * *", function () {
   query_Alerts();
 });
 
@@ -197,7 +213,6 @@ cron.schedule("*/1* * * * *", function () {
 app.get("/get-alerts", async (req, res) => {
   try {
     const alerts = await Alerts.find();
-    //console.log(alerts);
     res.status(200).json({
       status: "ok",
       data: alerts,
@@ -215,8 +230,7 @@ app.get("/get-alerts", async (req, res) => {
 
 //send OTP
 app.post("/send-otp", async (req, res) => {
-  // console.log(`Received message: \n ${data}`);
-  // res.sendStatus(200);
+ 
   try {
     await sendOTP(req.body.msg, req.body.to);
 

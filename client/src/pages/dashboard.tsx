@@ -31,6 +31,7 @@ export default function Dashboard() {
       setInfoAlerts(data);
     }
   };
+console.log(infoAlerts)
   useEffect(() => {
     getData();
   }, []);
@@ -44,6 +45,7 @@ export default function Dashboard() {
       setInfoCFA(CFAinfo);
     }
   }
+  console.log(infoCFA.location)
   useEffect(() => {
     getCFA();
   }, [])
@@ -76,7 +78,7 @@ export default function Dashboard() {
           Add CFA Member
         </Button>
         <SimpleGrid
-          columns={[2, 3, 4, 4]}
+          columns={[2, 3, 6, 6]}
           spacing={4}
           mt={6}
           w={"full"}
@@ -91,7 +93,13 @@ export default function Dashboard() {
             Time
           </Text>
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
-            Location
+            Latitude
+          </Text>
+          <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
+            Longitude
+          </Text>
+          <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
+            Area
           </Text>
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
             Count
@@ -122,7 +130,7 @@ const AlertItem = ({
   return (
     <>
       <SimpleGrid
-        columns={[2, 3, 4, 4]}
+        columns={[2, 3, 6, 6]}
         spacing={4}
         mt={6}
         w={"full"}
@@ -143,6 +151,12 @@ const AlertItem = ({
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
           {item?.Time}
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
+          {item?.Latitude}
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
+          {item?.Longitude}
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
           {item?.area}

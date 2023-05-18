@@ -29,7 +29,6 @@ import {
 } from "react-icons/io";
 import { GiServerRack } from "react-icons/gi";
 import { RiDashboard3Line } from "react-icons/ri";
-// import { ConnectWallet } from "@thirdweb-dev/react";
 import { HiOutlineViewGridAdd } from "react-icons/hi";
 import { Outlet, useNavigate } from "react-router-dom";
 import { IconType } from "react-icons";
@@ -47,26 +46,18 @@ const LinkItems = [
     icon: BiHome,
     href: `/dashboard`,
   },
-  // {
-  //   name: "Buy Hobo",
-  //   icon: HiOutlineViewGridAdd,
-  //   href: `/dashboard`,
-  // },
+  
   {
     name: "Feedback",
     icon: VscFeedback,
     href: `/feedback`,
-  },
-  {
-    name: "Confirmed Alerts",
-    icon: VscFeedback,
-    href: `#`,
   },
  
 ];
 
 export default function MainLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
 
   return (
       <Box
@@ -95,7 +86,7 @@ export default function MainLayout() {
         <MobileNav onOpen={onOpen} />
 
         <Box ml={{ base: 0, md: 60 }} p="4">
-          <Outlet />
+           <Outlet />
         </Box>
       </Box>
   );
@@ -119,14 +110,15 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text
-          fontSize="2xl"
+          fontSize="xl"
           fontFamily="monospace"
           fontWeight="bold"
           cursor={"pointer"}
+          mb={4}
           textTransform={"uppercase"}
           onClick={() => navigate("/")}
         >
-          GFW Alerts
+          Forest Cover Reporting Tool
         </Text>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
@@ -230,7 +222,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         fontFamily="monospace"
         fontWeight="bold"
       >
-        HB
+        Global Forest Watch
       </Text>
 
       <HStack spacing={{ base: "0", md: "6" }}>

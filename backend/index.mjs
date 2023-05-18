@@ -1,10 +1,15 @@
-import axios from 'axios';
-import qs from 'qs';
-import express from 'express';
+import axios from "axios";
+import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import connectDB from "./connectdb.mjs";
+import mongoose from "mongoose";
+import CFA from "./models/cfa_member.mjs";
+import Alerts from "./models/alertsInfo.mjs";
+import { bulk_predict, bulk_predict1, removeDuplicates } from "./utils.mjs";
+import cron from "node-cron";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +17,10 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const app = express();
+
+connectDB();
+
+mongoose.set("strictQuery", false);
 
 app.use(express.json());
 app.use(cors());
@@ -27,131 +36,201 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
 const ApiKey = process.env.API_KEY;
+const geocodeApi = process.env.GEOCODER_API_KEY;
 
-let data = qs.stringify({
-  'username': process.env.GFW_USERNAME,
-  'password': process.env.GFW_PASSWORD,
-});
-
-//get access token
-const getAccessToken = async () => {
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: 'https://data-api.globalforestwatch.org/auth/token',
-    headers: { 
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    data : data
-  };
-  
-  const response = await axios(config)
- return response.data.data.access_token;
-}
-
-//create api
-// const createAPI = async () => {
-
-//   let credentials = JSON.stringify({
-//     "alias": "gfw",
-//     "organization": "Vibranium",
-//     "email": "bundi.christine22@gmail.com",
-//     "domains": [],
-//     "never_expires": false
-//   });
-
-//   let Authorization = await getAccessToken();
-//   console.log(Authorization);
-
-//   let config = {
-//     method: 'post',
-//     url: 'https://data-api.globalforestwatch.org/auth/api-key',
-//     headers: { 
-//       'Content-Type': 'application/json', 
-//       'Authorization': `Bearer ${Authorization}`
-//     },
-//   };
-
-//     const response = await axios(config, credentials);
-//     // return response.data;
-//     console.log(response.data);
-
-   
-// };
-
-app.post('/query-alerts', async (req, res) => {
-
-  let data = JSON.stringify({
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-        [
-          [
-            34.573606904790495,
-            4.270479062477051
-          ],
-          [
-            34.573606904790495,
-            4.230025232393615
-          ],
-          [
-            34.88042812147856,
-            4.230025232393615
-          ],
-          [
-            34.88042812147856,
-            4.270479062477051
-          ],
-          [
-            34.573606904790495,
-            4.270479062477051
-          ]
-        ]
-      ]
-    },
-    "sql": "SELECT longitude, latitude, alert__date, alert__time_utc, alert__count FROM results WHERE alert__date >= '2021-01-10' AND alert__date <= '2023-01-01' "
-  });
-  
-  const url =  'https://data-api.globalforestwatch.org/dataset/nasa_viirs_fire_alerts/latest/query';
-
-  let config = {
-    headers: { 
-      'x-api-key': ApiKey, 
-      'Content-Type': 'application/json'
-    },
-  };
-
-  try{
-    const response = await axios.post(url, data, config);
-    console.log(response.data);
-
-    res.status(200).json({
-      data: response,
+app.post("/add-cfaMember", async (req, res) => {
+  const cfaInfo = req.body;
+  const location = req.body.location;
+  console.log(location);
+  const response = await axios.get(
+    `https://api.geoapify.com/v1/geocode/search?text=${location}%20county%2C%20Kenya&limit=1&format=json&apiKey=${geocodeApi}`
+  );
+  const data = await response.data;
+  const longitude = data.results[0].lon;
+  const latitude = data.results[0].lat;
+  try {
+    const CFAMember = CFA.create({ ...cfaInfo, longitude, latitude });
+    const result = await (await CFAMember).save();
+    //console.log(result);
+    res.status(201).json({
       status: "ok",
-      msg: "Alerts fetched successfully"
+      data: result,
+      msg: "CFA member added successfully",
     });
   } catch (error) {
     console.log(error);
-    res.status(400).json({
+    res.json({
       status: "error",
-      msg: "Error fetching alerts"
+      msg: "Error adding CFA member",
     });
   }
 });
 
-const PORT  = 5000;
+app.get("/get-all-cfas", async (req, res) => {
+  try {
+    const cfa_member = await CFA.find();
+    //console.log(cfa_member);
+    res.status(200).json({
+      status: "ok",
+      data: cfa_member,
+      msg: "CFA Info fetched successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "error",
+      msg: "Error fetching alerts",
+    });
+  }
+});
+
+const query_Alerts = async () => {
+  let data = JSON.stringify({
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [36.45967072012695, 0.7796484821584784],
+          [36.45967072012695, -1.8457405568735936],
+          [38.67890900137752, -1.8457405568735936],
+          [38.67890900137752, 0.7796484821584784],
+          [36.45967072012695, 0.7796484821584784],
+        ],
+      ],
+    },
+    sql: "SELECT longitude, latitude, alert__date, alert__time_utc, alert__count FROM results WHERE alert__date >= '2021-01-10' AND alert__date <= '2023-01-01' ",
+  });
+
+  const url =
+    "https://data-api.globalforestwatch.org/dataset/nasa_viirs_fire_alerts/latest/query";
+
+  let config = {
+    headers: {
+      "x-api-key": ApiKey,
+      "Content-Type": "application/json",
+    },
+  };
+
+  const response = await axios.post(url, data, config);
+  //console.log(response.data);
+
+  const returndata = response.data?.data; // array of objects
+
+  const locationsInfo = await bulk_predict1(returndata);
+
+  const uniqueItems = removeDuplicates(locationsInfo);
+
+  console.log(uniqueItems);
+  // const stateLocation = [];
+  // const newData = returndata.slice(0, 20);
+  // //console.log(newData)
+  // //    for (let i = 0; i < newData.length; i++) {
+  // //     let info = await axios.get(
+  // //       `https://api.geoapify.com/v1/geocode/reverse?lat=${newData[i].latitude}&lon=${newData[i].longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
+  // //     );
+  // //     stateLocation.push( info.data.results[0].formatted);
+
+  // //    // console.log(info.data.results[0].formatted);
+  // //   }
+
+  // //    let alertsInfo = []
+  // //   newData.forEach(async(item) => {
+  // //   alertsInfo.push ({
+  // //     date: item.alert__date,
+  // //     time: item.alert__time_utc,
+  // //     count: item.alert__count,
+  // //     Longitude:item.longitude,
+  // //     Latitude:item.latitude,
+  // //   })
+  // //  })
+  // let alertsInfo = [];
+
+  // await Promise.all(
+  //   newData.map(async (item) => {
+  //     let info = await axios.get(
+  //       `https://api.geoapify.com/v1/geocode/reverse?lat=${item.latitude}&lon=${item.longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
+  //     );
+  //     // console.log(info.data.results)
+  //     stateLocation.push(info.data.results[0].formatted);
+
+  //     alertsInfo.push({
+  //       date: item.alert__date,
+  //       time: item.alert__time_utc,
+  //       count: item.alert__count,
+  //       Longitude: item.longitude,
+  //       Latitude: item.latitude,
+  //       area: info.data.results[0].address_line1,
+  //     });
+  //   })
+  // );
+
+  // // At this point, the alertsInfo array should contain the desired data
+  // console.log(alertsInfo);
+
+  // const bulk_ops = alertsInfo.map((doc) => ({
+  //   updateOne: {
+  //     filter: {
+  //       date: doc.date,
+  //       Time: doc.time,
+  //       Count: doc.count,
+  //       Longitude: doc.Longitude,
+  //       Latitude: doc.Latitude,
+  //       area: doc.area,
+  //     },
+  //     update: doc,
+  //     upsert: true,
+  //   },
+  // }));
+
+  // const alerts = await Alerts.bulkWrite(bulk_ops);
+};
+cron.schedule("*/15* * * * *", function () {
+  query_Alerts();
+});
+
+// get all alerts
+app.get("/get-alerts", async (req, res) => {
+  try {
+    const alerts = await Alerts.find();
+    res.status(200).json({
+      status: "ok",
+      data: alerts,
+      msg: "Alerts fetched successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "error",
+      msg: "Error fetching alerts",
+    });
+  }
+});
+
+//send OTP
+app.post("/send-otp", async (req, res) => {
+  try {
+    await sendOTP(req.body.msg, req.body.to);
+
+    res.status(200).json({
+      status: "ok",
+      msg: "OTP sent successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "error",
+      msg: "An error was encountered",
+    });
+  }
+});
+
+const PORT = 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
-
-
-
-

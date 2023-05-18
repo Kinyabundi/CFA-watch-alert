@@ -8,8 +8,13 @@ import connectDB from "./connectdb.mjs";
 import mongoose from "mongoose";
 import CFA from "./models/cfa_member.mjs";
 import Alerts from "./models/alertsInfo.mjs";
-import { bulk_predict, bulk_predict1, removeDuplicates } from "./utils.mjs";
+import {
+  bulk_predict1,
+  getCounties,
+  removeDuplicates,
+} from "./utils.mjs";
 import cron from "node-cron";
+import sendSMS from "./sendSMS.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,6 +94,15 @@ app.get("/get-all-cfas", async (req, res) => {
   }
 });
 
+const getCFA = async (countyName) => {
+  try {
+    const cfa = await CFA.find({ $text: { $search: countyName } });
+    return cfa;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const query_Alerts = async () => {
   let data = JSON.stringify({
     geometry: {
@@ -125,69 +139,31 @@ const query_Alerts = async () => {
 
   const uniqueItems = removeDuplicates(locationsInfo);
 
-  console.log(uniqueItems);
-  // const stateLocation = [];
-  // const newData = returndata.slice(0, 20);
-  // //console.log(newData)
-  // //    for (let i = 0; i < newData.length; i++) {
-  // //     let info = await axios.get(
-  // //       `https://api.geoapify.com/v1/geocode/reverse?lat=${newData[i].latitude}&lon=${newData[i].longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
-  // //     );
-  // //     stateLocation.push( info.data.results[0].formatted);
+  const counties = getCounties(uniqueItems);
 
-  // //    // console.log(info.data.results[0].formatted);
-  // //   }
+  // using Promise.all get all CFA members
 
-  // //    let alertsInfo = []
-  // //   newData.forEach(async(item) => {
-  // //   alertsInfo.push ({
-  // //     date: item.alert__date,
-  // //     time: item.alert__time_utc,
-  // //     count: item.alert__count,
-  // //     Longitude:item.longitude,
-  // //     Latitude:item.latitude,
-  // //   })
-  // //  })
-  // let alertsInfo = [];
+  const cfaMembers = [];
 
-  // await Promise.all(
-  //   newData.map(async (item) => {
-  //     let info = await axios.get(
-  //       `https://api.geoapify.com/v1/geocode/reverse?lat=${item.latitude}&lon=${item.longitude}&type=city&lang=en&limit=3&format=json&apiKey=${geocodeApi}`
-  //     );
-  //     // console.log(info.data.results)
-  //     stateLocation.push(info.data.results[0].formatted);
+  await Promise.allSettled(
+    counties.map(async (county) => {
+      const cfa = await getCFA(county);
 
-  //     alertsInfo.push({
-  //       date: item.alert__date,
-  //       time: item.alert__time_utc,
-  //       count: item.alert__count,
-  //       Longitude: item.longitude,
-  //       Latitude: item.latitude,
-  //       area: info.data.results[0].address_line1,
-  //     });
-  //   })
-  // );
+      cfaMembers.push(cfa?.[0]);
+    })
+  );
 
-  // // At this point, the alertsInfo array should contain the desired data
-  // console.log(alertsInfo);
+  // remove undefined items by filtering
+  const filteredCFAs = cfaMembers.filter((item) => item !== undefined);
 
-  // const bulk_ops = alertsInfo.map((doc) => ({
-  //   updateOne: {
-  //     filter: {
-  //       date: doc.date,
-  //       Time: doc.time,
-  //       Count: doc.count,
-  //       Longitude: doc.Longitude,
-  //       Latitude: doc.Latitude,
-  //       area: doc.area,
-  //     },
-  //     update: doc,
-  //     upsert: true,
-  //   },
-  // }));
-
-  // const alerts = await Alerts.bulkWrite(bulk_ops);
+  // if filtered CFA length is greater than 1 send an sms
+  if (filteredCFAs.length > 1) {
+    await Promise.all(
+      filteredCFAs.map(async (cfa) => {
+        await sendSMS("An alert for triggering is upto", cfa.phoneNo);
+      })
+    );
+  }
 };
 cron.schedule("*/15* * * * *", function () {
   query_Alerts();
@@ -207,24 +183,6 @@ app.get("/get-alerts", async (req, res) => {
     res.status(400).json({
       status: "error",
       msg: "Error fetching alerts",
-    });
-  }
-});
-
-//send OTP
-app.post("/send-otp", async (req, res) => {
-  try {
-    await sendOTP(req.body.msg, req.body.to);
-
-    res.status(200).json({
-      status: "ok",
-      msg: "OTP sent successfully",
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({
-      status: "error",
-      msg: "An error was encountered",
     });
   }
 });

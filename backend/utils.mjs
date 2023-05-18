@@ -116,4 +116,27 @@ const removeDuplicates = (items) => {
   return uniqueItems;
 };
 
-export { predict, bulk_predict, bulk_predict1, removeDuplicates };
+// get unique county
+const getCounties = (items) => {
+  const counties = items.map((item) => item.county);
+
+  const uniqueCounties = _.uniq(counties);
+
+  return uniqueCounties;
+};
+
+// remove empty arrays from an array of arrays
+const removeEmptyArrays = (items) => {
+  const filteredItems = items.filter((item) => item.length > 0);
+
+  return filteredItems;
+};
+
+export {
+  predict,
+  bulk_predict,
+  bulk_predict1,
+  removeDuplicates,
+  getCounties,
+  removeEmptyArrays,
+};

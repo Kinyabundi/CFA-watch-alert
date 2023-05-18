@@ -33,6 +33,8 @@ const CFASchema = new moongose.Schema(
     { timestamps: true }
 );
 
+CFASchema.index({ location: "text" });
+
 const CFA = moongose.model('CFAMember', CFASchema);
 
 export default CFA;

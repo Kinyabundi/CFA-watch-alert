@@ -2,14 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { IInfoAlert } from "../types/Alerts";
 import { BsPersonPlus } from "react-icons/bs";
-import {
-  Text,
-  Box,
-  Flex,
-  SimpleGrid,
-  Button,
-  Icon,
-} from "@chakra-ui/react";
+import { Text, Box, Flex, SimpleGrid, Button, Icon } from "@chakra-ui/react";
 import { Helmet } from "react-helmet";
 import Modal from "../components/modal";
 import toast from "react-hot-toast";
@@ -22,34 +15,34 @@ export default function Dashboard() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const onClose = () => setIsOpen(false);
 
-
   const getData = async () => {
-    const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-alerts");
+    const resp = await axios.get("http://localhost:5000/get-alerts");
     //console.log(resp?.data?.data);
     if (resp?.status === 200) {
       const data = resp?.data?.data as IInfoAlert[];
       setInfoAlerts(data);
     }
   };
-console.log(infoAlerts)
+  // console.log(infoAlerts);
   useEffect(() => {
     getData();
   }, []);
 
   const getCFA = async () => {
-    const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-cfaMember");
-    console.log(resp.data);
-    if (resp?.status === 200) {
-      const CFAinfo = resp?.data
+    const resp = await axios.get("http://localhost:5000/get-all-cfas");
+    const respInfo = resp.data;
+    console.log(respInfo)
+    if (respInfo?.status === "ok") {
+      const CFAinfo = respInfo?.data;
       //console.log(CFAinfo)
       setInfoCFA(CFAinfo);
     }
-  }
-  console.log(infoCFA.location)
+  };
   useEffect(() => {
     getCFA();
-  }, [])
- 
+  }, []);
+
+  console.log(infoCFA[0]?.location);
 
   return (
     <>
@@ -57,9 +50,13 @@ console.log(infoAlerts)
         <title>Dashboard</title>
       </Helmet>
       <Box px={4} w={"full"}>
-        <Flex textTransform={'uppercase'} fontSize="xl"
+        <Flex
+          textTransform={"uppercase"}
+          fontSize="xl"
           fontFamily="monospace"
-          fontWeight="bold">Alerts
+          fontWeight="bold"
+        >
+          Alerts
         </Flex>
         <Button
           bg={"gray.200"}
@@ -104,7 +101,6 @@ console.log(infoAlerts)
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
             Count
           </Text>
-
         </SimpleGrid>
 
         {infoAlerts.length > 0 ? (
@@ -164,11 +160,7 @@ const AlertItem = ({
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
           {item?.Count}
         </Text>
-
       </SimpleGrid>
-
     </>
   );
 };
-
-

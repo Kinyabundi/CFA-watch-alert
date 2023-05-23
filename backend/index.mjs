@@ -138,6 +138,7 @@ const query_Alerts = async () => {
   const locationsInfo = await bulk_predict1(returndata);
 
   const uniqueItems = removeDuplicates(locationsInfo);
+  //save to datebase
 
   const counties = getCounties(uniqueItems);
 
@@ -160,6 +161,10 @@ const query_Alerts = async () => {
   if (filteredCFAs.length > 1) {
     await Promise.all(
       filteredCFAs.map(async (cfa) => {
+        //update the place of alert and time 
+        //save the sms 
+        //save feedback 
+        //add reply option 
         await sendSMS("An alert for triggering is upto", cfa.phoneNo);
       })
     );

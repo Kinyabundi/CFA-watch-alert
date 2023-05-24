@@ -16,7 +16,7 @@ export default function Dashboard() {
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const getData = async () => {
-    const resp = await axios.get(`https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-alerts?page=${page}`);
+    const resp = await axios.get(`https://cfa-watch-alert-ax8r.vercel.app/get-alerts?page=${page}`);
     if (resp?.status === 200) {
       const data = resp?.data?.data as IInfoAlert[];
       const updatedInfoAlerts = [...infoAlerts, ...data];
@@ -54,7 +54,7 @@ export default function Dashboard() {
   }, []);
 
   const getCFA = async () => {
-    const resp = await axios.get("https://5000-kinyabundi-cfawatchaler-ostnrfapdao.ws-eu97.gitpod.io/get-all-cfas");
+    const resp = await axios.get("https://cfa-watch-alert-ax8r.vercel.app/get-all-cfas");
     const respInfo = resp.data;
     console.log(respInfo);
     if (respInfo?.status === "ok") {

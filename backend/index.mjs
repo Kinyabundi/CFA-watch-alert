@@ -138,13 +138,13 @@ const query_Alerts = async () => {
   const locationsInfo = await bulk_predict1(returndata);
 
   const uniqueItems = removeDuplicates(locationsInfo);
-  //save to datebase
   // save to database
 await Promise.all(
   uniqueItems.map(async (item) => {
     try {
       const alerts = await Alerts.create(item);
-     console.log(alerts)
+    const results = await alerts.save();
+     console.log(results)
       console.log("Saved item:", Alerts);
     } catch (error) {
       console.log("Error saving item:", error);
@@ -174,18 +174,20 @@ await Promise.all(
   if (filteredCFAs.length > 1) {
     await Promise.all(
       filteredCFAs.map(async (cfa) => {
-        //update the place of alert and time 
         //save the sms 
         //save feedback 
         //add reply option 
-        await sendSMS("An alert for triggering is upto", cfa.phoneNo);
+        await sendSMS(`A fire alert for ${cfa.location} forest has been triggered. Please confirm and reply with either 1,2 or 3. 1- Illegal activity (non-licensed logging)
+        2 – Natural occurrence 
+        3 – Legal activity (licensed logging)`, cfa.phoneNo);
       })
     );
   }
 };
-cron.schedule("*/30* * * * *", function () {
-  query_Alerts();
-});
+// cron.schedule("**/1 * * * *", function () {
+//   query_Alerts();
+// });
+ query_Alerts();
 
 // get all alerts
 app.get("/get-alerts", async (req, res) => {

@@ -174,7 +174,6 @@ await Promise.all(
   if (filteredCFAs.length > 1) {
     await Promise.all(
       filteredCFAs.map(async (cfa) => {
-        //update the place of alert and time 
         //save the sms 
         //save feedback 
         //add reply option 
@@ -188,7 +187,7 @@ await Promise.all(
 // cron.schedule("**/1 * * * *", function () {
 //   query_Alerts();
 // });
-query_Alerts();
+ query_Alerts();
 
 // get all alerts
 app.get("/get-alerts", async (req, res) => {

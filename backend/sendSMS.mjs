@@ -23,6 +23,7 @@ export default async function sendSMS(msg, to) {
       message: msg,
       from: "VibraniumID",
     });
+    
     console.log(result);
   } catch (ex) {
     console.error(ex);

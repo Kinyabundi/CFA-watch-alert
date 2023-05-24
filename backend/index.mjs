@@ -103,6 +103,27 @@ const getCFA = async (countyName) => {
   }
 };
 
+//check if the alert object is unique
+const saveAlertsToDB = async (items) => {
+  const savedItems = [];
+  for (const item of items) {
+    try {
+      const { date, time } = item;
+      const existingItem = await Alerts.findOne({ date, time });
+      if (!existingItem) {
+        const alert = await Alerts.create(item);
+        const savedAlert = await alert.save();
+        savedItems.push(savedAlert);
+        console.log("Saved item:", savedAlert);
+      }
+    } catch (error) {
+      console.log("Error saving item:", error);
+    }
+  }
+  return savedItems;
+};
+
+
 const query_Alerts = async () => {
   let data = JSON.stringify({
     geometry: {
@@ -135,41 +156,34 @@ const query_Alerts = async () => {
 
   const returndata = response.data?.data; // array of objects
 
+
+
   const locationsInfo = await bulk_predict1(returndata);
 
   const uniqueItems = removeDuplicates(locationsInfo);
-  // save to database
-await Promise.all(
-  uniqueItems.map(async (item) => {
-    try {
-      const alerts = await Alerts.create(item);
-    const results = await alerts.save();
-     console.log(results)
-      console.log("Saved item:", Alerts);
-    } catch (error) {
-      console.log("Error saving item:", error);
-    }
-  })
-);
+
+//save alerts to database
+
+const savedItems = await saveAlertsToDB(uniqueItems);
+console.log("Saved items:", savedItems);
 
 
   const counties = getCounties(uniqueItems);
 
-  // using Promise.all get all CFA members
+   // using Promise.all get all CFA members
 
-  const cfaMembers = [];
+   const cfaMembers = [];
 
-  await Promise.allSettled(
-    counties.map(async (county) => {
-      const cfa = await getCFA(county);
-
-      cfaMembers.push(cfa?.[0]);
-    })
-  );
-
-  // remove undefined items by filtering
+   await Promise.allSettled(
+     counties.map(async (county) => {
+       const cfa = await getCFA(county);
+ 
+       cfaMembers.push(cfa?.[0]);
+     })
+   );
+    // remove undefined items by filtering
   const filteredCFAs = cfaMembers.filter((item) => item !== undefined);
-
+ console.log(filteredCFAs)
   // if filtered CFA length is greater than 1 send an sms
   if (filteredCFAs.length > 1) {
     await Promise.all(
@@ -177,17 +191,19 @@ await Promise.all(
         //save the sms 
         //save feedback 
         //add reply option 
-        await sendSMS(`A fire alert for ${cfa.location} forest has been triggered. Please confirm and reply with either 1,2 or 3. 1- Illegal activity (non-licensed logging)
-        2 – Natural occurrence 
-        3 – Legal activity (licensed logging)`, cfa.phoneNo);
+        await sendSMS(`Hello ${cfa.name}. A fire alert for ${cfa.location} forest has been triggered. You are requested to please confirm and reply with either 1, 2, or 3. 1 for Illegal activity (non-licensed logging), 2 for a Natural occurrence, 3 for Legal activity (licensed logging)`,
+        cfa.phoneNo);
       })
     );
   }
+
 };
+
+
 // cron.schedule("**/1 * * * *", function () {
 //   query_Alerts();
 // });
- query_Alerts();
+query_Alerts();
 
 // get all alerts
 app.get("/get-alerts", async (req, res) => {

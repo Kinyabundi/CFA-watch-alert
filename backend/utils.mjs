@@ -37,11 +37,20 @@ const bulk_predict = (data) => {
       continue;
     }
 
+    // Convert UTC time to EAT time
+    const utcTime = new Date(data[i].alert__time_utc);
+    const eatTime = utcTime.toLocaleString("en-US", {
+      timeZone: "Africa/Nairobi",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    });
+    
     // Add the county to the data
     location_data.push({
       county: county.properties.COUNTY,
       date: data[i].alert__date,
-      time: data[i].alert__time_utc,
+      time: eatTime,
       count: data[i].alert__count,
     });
   }
@@ -131,6 +140,8 @@ const removeEmptyArrays = (items) => {
 
   return filteredItems;
 };
+
+
 
 export {
   predict,

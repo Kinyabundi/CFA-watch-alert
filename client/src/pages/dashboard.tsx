@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { IInfoAlert } from "../types/Alerts";
 import { BsPersonPlus } from "react-icons/bs";
 import { Text, Box, Flex, SimpleGrid, Button, Icon } from "@chakra-ui/react";
@@ -11,38 +11,61 @@ import { IInfoCFA } from "../types/cfa";
 export default function Dashboard() {
   const [infoAlerts, setInfoAlerts] = useState<IInfoAlert[]>([]);
   const [infoCFA, setInfoCFA] = useState<IInfoCFA[]>([]);
-  //   const setIsOpen = useModal((state) => state.setIsOpen);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const onClose = () => setIsOpen(false);
+  const [page, setPage] = useState(1);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   const getData = async () => {
-    const resp = await axios.get("https://cfa-watch-alert-ax8r.vercel.app/get-alerts");
-    //console.log(resp?.data?.data);
+    const resp = await axios.get(`https://cfa-watch-alert-ax8r.vercel.app/get-alerts?page=${page}`);
     if (resp?.status === 200) {
       const data = resp?.data?.data as IInfoAlert[];
-      setInfoAlerts(data);
+      const updatedInfoAlerts = [...infoAlerts, ...data];
+      setInfoAlerts(updatedInfoAlerts);
     }
   };
-  console.log(infoAlerts);
+
   useEffect(() => {
     getData();
+  }, [page]);
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      const target = entries[0];
+      if (target.isIntersecting) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    }, options);
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
   }, []);
 
   const getCFA = async () => {
     const resp = await axios.get("https://cfa-watch-alert-ax8r.vercel.app/get-all-cfas");
     const respInfo = resp.data;
-    console.log(respInfo)
+    console.log(respInfo);
     if (respInfo?.status === "ok") {
       const CFAinfo = respInfo?.data;
-      //console.log(CFAinfo)
       setInfoCFA(CFAinfo);
     }
   };
+
   useEffect(() => {
     getCFA();
   }, []);
-
-  console.log(infoCFA[0]?.location);
 
   return (
     <>
@@ -75,7 +98,7 @@ export default function Dashboard() {
           Add CFA Member
         </Button>
         <SimpleGrid
-          columns={[2, 3, 6, 6]}
+          columns={[2, 3, 4, 4]}
           spacing={4}
           mt={6}
           w={"full"}
@@ -90,12 +113,6 @@ export default function Dashboard() {
             Time
           </Text>
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
-            Latitude
-          </Text>
-          <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
-            Longitude
-          </Text>
-          <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
             Area
           </Text>
           <Text fontSize={"sm"} fontWeight={"normal"} color={"gray.500"}>
@@ -104,14 +121,17 @@ export default function Dashboard() {
         </SimpleGrid>
 
         {infoAlerts.length > 0 ? (
-          infoAlerts.map((item, i) => (
-            <AlertItem item={item} key={i} refresh={getData} />
-          ))
+          <>
+            {infoAlerts.map((item, i) => (
+              <AlertItem item={item} key={i} refresh={getData} />
+            ))}
+            <div ref={loaderRef}></div>
+          </>
         ) : (
           <Text>No Alerts</Text>
         )}
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose} />
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   );
 }
@@ -126,7 +146,7 @@ const AlertItem = ({
   return (
     <>
       <SimpleGrid
-        columns={[2, 3, 6, 6]}
+        columns={[2, 3, 4, 4]}
         spacing={4}
         mt={6}
         w={"full"}
@@ -146,19 +166,13 @@ const AlertItem = ({
           {item?.date}
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.Time}
+          {item?.time}
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.Latitude}
+          {item?.county}
         </Text>
         <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.Longitude}
-        </Text>
-        <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.area}
-        </Text>
-        <Text fontSize={"xs"} fontWeight={"normal"} color={"gray.900"}>
-          {item?.Count}
+          {item?.count}
         </Text>
       </SimpleGrid>
     </>

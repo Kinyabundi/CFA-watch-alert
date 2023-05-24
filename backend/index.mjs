@@ -139,6 +139,19 @@ const query_Alerts = async () => {
 
   const uniqueItems = removeDuplicates(locationsInfo);
   //save to datebase
+  // save to database
+await Promise.all(
+  uniqueItems.map(async (item) => {
+    try {
+      const alerts = await Alerts.create(item);
+     console.log(alerts)
+      console.log("Saved item:", Alerts);
+    } catch (error) {
+      console.log("Error saving item:", error);
+    }
+  })
+);
+
 
   const counties = getCounties(uniqueItems);
 
@@ -170,7 +183,7 @@ const query_Alerts = async () => {
     );
   }
 };
-cron.schedule("*/15* * * * *", function () {
+cron.schedule("*/30* * * * *", function () {
   query_Alerts();
 });
 

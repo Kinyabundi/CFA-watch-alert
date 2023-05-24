@@ -20,7 +20,8 @@ export default function Dashboard() {
     //console.log(resp?.data?.data);
     if (resp?.status === 200) {
       const data = resp?.data?.data as IInfoAlert[];
-      setInfoAlerts(data);
+      const data2 = data.slice(0,200);
+      setInfoAlerts(data2);
     }
   };
   console.log(infoAlerts);

@@ -21,6 +21,6 @@ const routes: RouteObject[] = [
     }
 ];
 
-const Router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes);
 
-export default Router;
+export default router;

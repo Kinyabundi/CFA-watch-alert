@@ -22,6 +22,7 @@ const CFASchema = new moongose.Schema(
         location: {
             type: String,
             required: true,
+            unqiue: true,
         },
         longitude: {
             type: String, 

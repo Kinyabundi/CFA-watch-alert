@@ -6,22 +6,14 @@ const AlertsSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        Time: {
+        time: {
             type: String,
             required: true,
         },
-        Longitude: {
-            type: String,
-            required: true,
-        },
-        Latitude: {
-            type: String,
-            required: true,
-        },
-        area: {
+        county: {
             type: String,
         },
-        Count: {
+        count: {
             type: Number,
             required: true, 
         },

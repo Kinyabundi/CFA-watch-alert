@@ -138,6 +138,20 @@ const query_Alerts = async () => {
   const locationsInfo = await bulk_predict1(returndata);
 
   const uniqueItems = removeDuplicates(locationsInfo);
+  //save to datebase
+  // save to database
+await Promise.all(
+  uniqueItems.map(async (item) => {
+    try {
+      const alerts = await Alerts.create(item);
+     console.log(alerts)
+      console.log("Saved item:", Alerts);
+    } catch (error) {
+      console.log("Error saving item:", error);
+    }
+  })
+);
+
 
   const counties = getCounties(uniqueItems);
 
@@ -160,12 +174,16 @@ const query_Alerts = async () => {
   if (filteredCFAs.length > 1) {
     await Promise.all(
       filteredCFAs.map(async (cfa) => {
+        //update the place of alert and time 
+        //save the sms 
+        //save feedback 
+        //add reply option 
         await sendSMS("An alert for triggering is upto", cfa.phoneNo);
       })
     );
   }
 };
-cron.schedule("*/15* * * * *", function () {
+cron.schedule("*/30* * * * *", function () {
   query_Alerts();
 });
 

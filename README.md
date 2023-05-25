@@ -96,3 +96,86 @@ The repository includes additional files that provide utility functions:
 This backend application provides the necessary APIs and background processes to handle CFA member registration, fire alert processing, and CFA member notifications. With the server running, you can integrate it with a frontend application to create a complete web application for managing CFA members and fire alerts.
    
 
+
+
+# Frontend App
+
+This is the frontend application for your project. It is built using React, Typescript and Chakra UI.
+
+## Getting Started
+
+These instructions will help you get a copy of the project up and running on your local machine.
+
+### Prerequisites
+
+- Node.js
+- npm  or yarn or pnpm
+
+### Installing
+
+1. Clone the repository:
+
+```
+git clone https://github.com/Kinyabundi/CFA-watch-alert.git
+```
+
+2. Navigate to the project directory:
+
+```
+cd CFA-watch-alert/client
+```
+
+3. Install the dependencies:
+
+```
+npm install
+or
+yarn 
+or 
+pnpm install
+```
+
+### Running the App
+
+To run the application locally, use the following command:
+
+```
+npm start
+or 
+yarn dev
+or
+pnpm run dev
+```
+
+The app will be accessible at [http://localhost:3000](http://localhost:3000).
+
+## Features
+
+- **Dashboard:** The app provides a dashboard that displays alerts and information related to CFA (Country Fire Authority).
+- **Alerts:** The dashboard shows alerts with details such as date, time, area, and count.
+- **Add CFA Member:** Users can add a CFA member using the "Add CFA Member" button in the dashboard.
+- **Modal:** The app includes a modal component for adding a CFA member.
+- **Infinite Scrolling:** Alerts are loaded dynamically as the user scrolls down the page.
+- **API Integration:** The app interacts with a backend API to fetch alert data and CFA information.
+
+## Technologies Used
+
+- React
+- Chakra UI
+- axios (HTTP client)
+- react-icons (icon library)
+- react-helmet (HTML metadata management)
+- react-hot-toast (notification library)
+
+## Folder Structure
+
+- `/src/components`: Contains reusable components used in the app.
+- `/src/types`: Contains TypeScript type definitions used in the app.
+- `/src/pages`: Contains the main pages of the app.
+- `/src/router`: Contains the app's routing configuration.
+- `/src/App.tsx`: Entry point of the app.
+
+## API Endpoints
+
+- **GET `/get-alerts?page=<page>`**: Fetches alert data with pagination support.
+- **GET `/get-all-cfas`**: Fetches information about all CFA members.

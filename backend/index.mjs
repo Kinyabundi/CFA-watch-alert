@@ -203,7 +203,6 @@ console.log("Saved items:", savedItems);
 // cron.schedule("**/1 * * * *", function () {
 //   query_Alerts();
 // });
-query_Alerts();
 
 // get all alerts
 app.get("/get-alerts", async (req, res) => {

@@ -13,7 +13,6 @@ import {
   getCounties,
   removeDuplicates,
 } from "./utils.mjs";
-import cron from "node-cron";
 import sendSMS from "./sendSMS.mjs";
 
 const __filename = fileURLToPath(import.meta.url);

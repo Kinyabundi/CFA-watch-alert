@@ -54,7 +54,7 @@ export default function Dashboard() {
   }, []);
 
   const getCFA = async () => {
-    const resp = await axios.get("https://cfa-watch-alert-ax8r.vercel.app/get-all-cfas");
+    const resp = await axios.get("http://localhost:5000/get-all-cfa");
     const respInfo = resp.data;
     console.log(respInfo);
     if (respInfo?.status === "ok") {

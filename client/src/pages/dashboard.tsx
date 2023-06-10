@@ -16,7 +16,7 @@ export default function Dashboard() {
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const getData = async () => {
-    const resp = await axios.get(`https://cfa-watch-alert-ax8r.vercel.app/get-alerts?page=${page}`);
+    const resp = await axios.get('http://localhost:5000/get-alerts');
     if (resp?.status === 200) {
       const data = resp?.data?.data as IInfoAlert[];
       const updatedInfoAlerts = [...infoAlerts, ...data];

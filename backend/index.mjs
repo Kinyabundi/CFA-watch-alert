@@ -13,7 +13,6 @@ import {
   getCounties,
   removeDuplicates,
 } from "./utils.mjs";
-import cron from "node-cron";
 import sendSMS from "./sendSMS.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -203,7 +202,6 @@ console.log("Saved items:", savedItems);
 // cron.schedule("**/1 * * * *", function () {
 //   query_Alerts();
 // });
-query_Alerts();
 
 // get all alerts
 app.get("/get-alerts", async (req, res) => {

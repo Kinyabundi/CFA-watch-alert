@@ -1,4 +1,5 @@
-import counties_data from "./data/counties.json" assert { type: "json" };
+//import counties_data from "./data/counties.json" assert { type: "json" };
+import counties_data from "./data/counties.json" assert { type: "json"} ;
 import * as turf from "@turf/turf";
 import _ from "lodash";
 
